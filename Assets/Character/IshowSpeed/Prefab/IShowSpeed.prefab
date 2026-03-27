@@ -113,7 +113,8 @@ MonoBehaviour:
   sprintInput: {fileID: -8027255260204449370, guid: 4e74303c32ff52d49baaf909e103bc4a, type: 3}
   walkInput: {fileID: 4412108457397334793, guid: 4e74303c32ff52d49baaf909e103bc4a, type: 3}
   mainCamera: {fileID: 0}
-  pushPower: 10
+  pushPower: 20
+  kickCooldown: 0.5
 --- !u!114 &-797086927503421476
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,7 +129,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkAnimatorExpanded: 0
-  AuthorityMode: 0
+  AuthorityMode: 1
   m_Animator: {fileID: 4822722127635776528}
   TransitionStateInfoList:
   - IsCrossFadeExit: 0
@@ -170,7 +171,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ShowTopMostFoldoutHeaderGroup: 1
-  NetworkTransformExpanded: 0
+  NetworkTransformExpanded: 1
   AutoOwnerAuthorityTickOffset: 1
   PositionInterpolationType: 0
   RotationInterpolationType: 0
@@ -181,7 +182,7 @@ MonoBehaviour:
   RotationMaxInterpolationTime: 0.1
   ScaleLerpSmoothing: 1
   ScaleMaxInterpolationTime: 0.1
-  AuthorityMode: 0
+  AuthorityMode: 1
   TickSyncChildren: 0
   UseUnreliableDeltas: 0
   SyncPositionX: 1

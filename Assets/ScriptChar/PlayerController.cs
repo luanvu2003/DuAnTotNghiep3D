@@ -35,6 +35,8 @@ public class PlayerController : NetworkBehaviour
     public Transform mainCamera;
     [Header("Physics Settings")]
     public float pushPower = 2.0f; // Độ mạnh khi đẩy vật
+    public float kickCooldown = 0.5f; // Thời gian chờ giữa 2 lần đá
+    private float lastKickTime = 0f;  // Lưu lại thời điểm đá cuối cùng
 
     private CharacterController characterController;
     private NetworkAnimator networkAnimator;
@@ -223,18 +225,43 @@ public class PlayerController : NetworkBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        if (Time.time - lastKickTime < kickCooldown) return;
+
         Rigidbody body = hit.collider.attachedRigidbody;
 
-        // Kiểm tra xem vật bị chạm có Rigidbody và không phải là Kinematic không
-        if (body == null || body.isKinematic) return;
+        // CHÚ Ý: ĐÃ XÓA "|| body.isKinematic"
+        // Vì NetworkRigidbody trên Client sẽ tự động làm quả bóng thành Kinematic
+        if (body == null) return;
 
-        // Không đẩy vật nằm ở phía dưới chân (tránh bị lỗi nhảy lên vật)
         if (hit.moveDirection.y < -0.3f) return;
 
-        // Tính toán hướng đẩy dựa trên hướng di chuyển của nhân vật
-        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
+        var netObj = hit.collider.GetComponent<NetworkObject>();
+        if (netObj != null)
+        {
+            lastKickTime = Time.time;
 
-        // Tác động lực vào vật
-        body.AddForce(pushDir * pushPower, ForceMode.Impulse);
+            // TÍNH HƯỚNG SÚT: Từ tâm người chơi xuyên qua tâm quả bóng (chuẩn nhất)
+            Vector3 pushDir = hit.collider.transform.position - transform.position;
+            pushDir.y = 0; // Bỏ trục Y để lực đẩy chỉ bay ngang trên mặt đất
+            pushDir.Normalize(); // Chuẩn hóa về độ dài 1
+
+            // Gọi Server đá hộ. PushPower để khoảng 20 là bay rất xa rồi nhé!
+            PushBallServerRpc(netObj.NetworkObjectId, pushDir * pushPower);
+        }
+    }
+
+    [ServerRpc]
+    private void PushBallServerRpc(ulong targetId, Vector3 force)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetId, out var netObj))
+        {
+            Rigidbody rb = netObj.GetComponent<Rigidbody>();
+            if (rb != null)
+            {
+                // Bật dòng Log này lên để chắc chắn Server đã nhận được lệnh
+                Debug.Log($"[SERVER] Đang sút bóng với lực: {force.magnitude}");
+                rb.AddForce(force, ForceMode.Impulse);
+            }
+        }
     }
 }

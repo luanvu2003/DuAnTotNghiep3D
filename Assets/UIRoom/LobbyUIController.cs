@@ -15,6 +15,9 @@ public class LobbyUIController : NetworkBehaviour
 
     [Header("Cài đặt nhân vật")]
     public GameObject playerPrefab;
+    [Header("Cài đặt Quả Bóng")]
+    public GameObject ballPrefab;       // Kéo Prefab quả bóng vào đây
+    public Transform ballSpawnPoint;    // Kéo vị trí BallSpawnPoint vào đây
 
     private VisualElement mainMenuContent, roomPanel, playerListBox, container, boxMenu;
     private Label roomCodeDisplay, errorText, waitingMsg;
@@ -202,12 +205,22 @@ public class LobbyUIController : NetworkBehaviour
             // Nếu đã gán các vị trí spawn trong Inspector
             if (spawnPoints != null && spawnPoints.Length > 0)
             {
-                // Dùng toán tử chia lấy dư (%) để nếu > 4 người thì quay lại vị trí 1
                 int posIndex = index % spawnPoints.Length;
                 spawnPosition = spawnPoints[posIndex].position;
                 spawnRotation = spawnPoints[posIndex].rotation;
             }
 
+            // --- FIX 1: DỌN NHÂN VẬT CŨ NẾU CHƠI LẠI VÁN MỚI ---
+            if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                // Nếu người này đã có nhân vật từ ván trước, hủy nó đi
+                if (client.PlayerObject != null && client.PlayerObject.IsSpawned)
+                {
+                    client.PlayerObject.Despawn(true);
+                }
+            }
+
+            // Đẻ nhân vật mới
             GameObject player = Instantiate(playerPrefab, spawnPosition, spawnRotation);
             player.GetComponent<NetworkObject>().SpawnAsPlayerObject(clientId);
 
@@ -215,6 +228,42 @@ public class LobbyUIController : NetworkBehaviour
             index++;
         }
 
+        // --- FIX 2: SỬA LỖI XÓA BÓNG TỪ VÁN TRƯỚC ---
+        GameObject[] oldBalls = GameObject.FindGameObjectsWithTag("Ball");
+        foreach (GameObject b in oldBalls)
+        {
+            var netObj = b.GetComponent<NetworkObject>();
+
+            if (netObj != null && netObj.IsSpawned)
+            {
+                netObj.Despawn(true); // Lệnh này tự động Hủy mạng + Xóa (Destroy) vật thể luôn
+            }
+            else
+            {
+                Destroy(b); // Chỉ dùng Destroy thủ công nếu nó bị kẹt chưa được lên mạng
+            }
+        }
+
+        if (ballPrefab != null)
+        {
+            Vector3 spawnPos = new Vector3(0, 5, 0); // Vị trí dự phòng
+            Quaternion spawnRot = Quaternion.identity;
+
+            // Nếu đã gán vị trí BallSpawnPoint trên Inspector thì lấy vị trí đó
+            if (ballSpawnPoint != null)
+            {
+                spawnPos = ballSpawnPoint.position;
+                spawnRot = ballSpawnPoint.rotation;
+            }
+
+            // Tạo quả bóng và gọi nó ra mạng cho tất cả cùng thấy
+            GameObject ball = Instantiate(ballPrefab, spawnPos, spawnRot);
+            ball.GetComponent<NetworkObject>().Spawn();
+
+            Debug.Log("[SERVER] Tiếng còi khai cuộc! Đã ném bóng ra sân!");
+        }
+
+        // Cuối cùng mới gọi ClientRpc để chuyển Scene hoặc tắt UI
         StartGameClientRpc();
     }
 
