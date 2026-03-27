@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -670346244768070867}
   m_Layer: 0
   m_Name: IShowSpeed
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -113,6 +113,7 @@ MonoBehaviour:
   sprintInput: {fileID: -8027255260204449370, guid: 4e74303c32ff52d49baaf909e103bc4a, type: 3}
   walkInput: {fileID: 4412108457397334793, guid: 4e74303c32ff52d49baaf909e103bc4a, type: 3}
   mainCamera: {fileID: 0}
+  pushPower: 10
 --- !u!114 &-797086927503421476
 MonoBehaviour:
   m_ObjectHideFlags: 0
