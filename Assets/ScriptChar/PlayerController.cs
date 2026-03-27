@@ -342,7 +342,7 @@ public class PlayerController : NetworkBehaviour
             }
             else
             {
-                if (healText != null) healText.text = "Giữ E để cứu";
+                if (healText != null) healText.text = "Giữ E hồi máu cho người chơi";
 
                 if (Input.GetKey(KeyCode.E))
                 {
