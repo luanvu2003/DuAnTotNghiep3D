@@ -1,0 +1,164 @@
+/* --- 1. Container PHỦ KÍN MÀN HÌNH --- */
+.container-fullscreen {
+    flex-grow: 1;
+    position: absolute;
+    top: 0px; left: 0px; right: 0px; bottom: 0px; /* Thêm px cho số 0 */
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(20, 5, 5); 
+}
+
+/* --- 2. Khung Box Menu (Panel Ma Mị) --- */
+.ma-mi-panel {
+    width: 500px;
+    padding: 45px;
+    background-color: rgba(10, 0, 0, 0.95); 
+    border-radius: 15px;
+    border-width: 2px;
+    border-color: rgba(200, 20, 20, 0.6);
+    
+    /* FIX: Dùng 'all' để Unity không bị lỗi khi đọc từng property */
+    transition-property: all; 
+    transition-duration: 0.6s;
+    transition-timing-function: ease-out; 
+}
+
+/* --- Trạng thái Anim IN/OUT --- */
+.ma-mi-panel.hide-state {
+    opacity: 0;
+    /* FIX: Bắt buộc phải có chữ px và 2 giá trị cho scale */
+    translate: 0px -100px; 
+    scale: 0.8 0.8; 
+}
+
+.ma-mi-panel.show-state {
+    opacity: 1;
+    /* FIX: Bắt buộc phải có chữ px và 2 giá trị cho scale */
+    translate: 0px 0px;
+    scale: 1 1; 
+}
+
+/* --- 3. Tiêu đề Game --- */
+.title-text {
+    font-size: 48px;
+    -unity-font-style: bold;
+    color: rgb(220, 20, 60); 
+    -unity-text-align: middle-center;
+    margin-bottom: 40px;
+}
+
+/* --- 4. Ô Nhập liệu (Input Field) --- */
+.input-field {
+    margin-bottom: 25px;
+    -unity-font-style: bold;
+}
+
+.input-field > .unity-label {
+    color: rgb(180, 180, 180);
+    width: 170px;
+    -unity-text-align: middle-left;
+}
+
+.input-field > .unity-text-field__input {
+    background-color: rgb(15, 15, 15); 
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(80, 80, 80); 
+    padding: 12px;
+    font-size: 19px;
+    color: white;
+}
+
+.input-field > .unity-text-field__input:focus {
+    border-color: rgb(220, 20, 60);
+    background-color: rgb(30, 10, 10);
+}
+
+.input-field > .unity-text-field__input--placeholder {
+    color: rgb(90, 90, 90);
+}
+
+/* --- 5. Chỉnh sửa Nút bấm (Buttons) --- */
+.btn {
+    height: 65px;
+    font-size: 24px;
+    -unity-font-style: bold;
+    border-radius: 10px;
+    margin-top: 15px;
+    color: white;
+    transition-property: all; /* Dùng all cho an toàn */
+    transition-duration: 0.15s;
+    border-width: 2px;
+}
+
+/* NÚT THAM GIA */
+.btn-crimson {
+    background-color: rgb(80, 0, 0); 
+    border-color: rgb(120, 0, 0);
+}
+
+.btn-crimson:hover {
+    background-color: rgb(160, 0, 0);
+    border-color: rgb(220, 20, 60);
+    scale: 1.04 1.04; /* FIX: 2 giá trị cho scale */
+}
+
+/* NÚT TẠO PHÒNG */
+.btn-metal {
+    background-color: rgb(40, 40, 40); 
+    border-color: rgb(70, 70, 70);
+}
+
+.btn-metal:hover {
+    background-color: rgb(80, 80, 80);
+    border-color: rgb(150, 150, 150);
+    scale: 1.04 1.04; /* FIX: 2 giá trị cho scale */
+}
+
+/* --- 6. Thành phần khác --- */
+.divider-text {
+    -unity-text-align: middle-center;
+    color: rgb(100, 100, 100);
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.error-msg {
+    color: rgb(255, 60, 60); 
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    margin-bottom: 15px;
+    font-size: 16px;
+}
+
+/* --- UI CHO MÀN HÌNH ROOM CHỜ --- */
+#room-panel {
+    display: none; /* Mặc định ẩn, chỉ hiện khi vào phòng */
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-list-container {
+    width: 100%;
+    height: 250px;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    margin: 20px 0;
+    padding: 10px;
+    border-width: 1px;
+    border-color: rgba(220, 20, 60, 0.3);
+}
+
+.player-item-label {
+    font-size: 20px;
+    color: #00ff00; /* Màu xanh neon cho thợ săn sẵn sàng */
+    margin-bottom: 5px;
+    -unity-font-style: bold;
+}
+
+#room-code-display {
+    color: #ffaa00;
+    font-size: 24px;
+    -unity-font-style: bold;
+}

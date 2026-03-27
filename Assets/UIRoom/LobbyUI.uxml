@@ -1,0 +1,33 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="LobbyStyles.uss" />
+    <ui:VisualElement name="container-fullscreen" class="container-fullscreen">
+        <ui:VisualElement name="ma-mi-panel" class="ma-mi-panel">
+            
+            <!-- MÀN HÌNH 1: MENU CHÍNH -->
+            <ui:VisualElement name="main-menu-content">
+                <ui:Label text="MIDNIGHT HUNT" class="title-text" />
+                <ui:TextField label="DANH TÍNH:" name="input-name" class="input-field" />
+                <ui:TextField label="MÃ SĂN BẮN:" name="input-code" class="input-field" />
+                <ui:Label name="error-text" text="" class="error-msg" />
+                <ui:Button text="THAM GIA SĂN" name="btn-join" class="btn btn-crimson" />
+                <ui:Label text="- HOẶC -" class="divider-text" />
+                <ui:Button text="TẠO PHÒNG MỚI" name="btn-host" class="btn btn-metal" />
+            </ui:VisualElement>
+
+            <!-- MÀN HÌNH 2: PHÒNG CHỜ (MẶC ĐỊNH ẨN) -->
+            <ui:VisualElement name="room-panel">
+                <ui:Label text="TRẠM ĐIỀU HÀNH" class="title-text" style="font-size: 35px;" />
+                <ui:Label name="room-code-display" text="MÃ PHÒNG: 000000" />
+                
+                <ui:Label text="DANH SÁCH THỢ SĂN:" style="margin-top: 10px; color: #888;" />
+                <ui:VisualElement name="player-list-box" class="player-list-container">
+                    <!-- Tên thợ săn sẽ hiện ở đây -->
+                </ui:VisualElement>
+
+                <ui:Button text="BẮT ĐẦU ĐI SĂN" name="btn-start-game" class="btn btn-crimson" style="display: none;" />
+                <ui:Label name="waiting-msg" text="Đang đợi chủ phòng lệnh xuất kích..." class="divider-text" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
