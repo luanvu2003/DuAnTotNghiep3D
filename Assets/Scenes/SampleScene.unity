@@ -800,6 +800,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1964602097
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1964602098}
+  m_Layer: 0
+  m_Name: EnemySpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1964602098
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1964602097}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 40.64357, y: 3.43, z: 34.18}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2070880947
 GameObject:
   m_ObjectHideFlags: 0
@@ -835,6 +866,8 @@ MonoBehaviour:
   playerPrefab: {fileID: 3833354380349390759, guid: 6c20dcafdecdbc44c95ca20be40e60c4, type: 3}
   ballPrefab: {fileID: 5614652742813323628, guid: 168deba034501ff439ee5c12d9772d73, type: 3}
   ballSpawnPoint: {fileID: 812358130}
+  enemyPrefab: {fileID: 4972175580773740475, guid: 07e05ed8c4ca9e74f99f65c581d615ca, type: 3}
+  enemySpawnPoint: {fileID: 1964602098}
   spawnPoints:
   - {fileID: 734106056}
   - {fileID: 2117584937}
@@ -947,3 +980,4 @@ SceneRoots:
   - {fileID: 299873965}
   - {fileID: 965576141}
   - {fileID: 812358130}
+  - {fileID: 1964602098}

@@ -18,6 +18,9 @@ public class LobbyUIController : NetworkBehaviour
     [Header("Cài đặt Quả Bóng")]
     public GameObject ballPrefab;       // Kéo Prefab quả bóng vào đây
     public Transform ballSpawnPoint;    // Kéo vị trí BallSpawnPoint vào đây
+    [Header("Cài đặt Enemy")]
+    public GameObject enemyPrefab;       // Kéo Prefab quả bóng vào đây
+    public Transform enemySpawnPoint;    // Kéo vị trí BallSpawnPoint vào đây
 
     private VisualElement mainMenuContent, roomPanel, playerListBox, container, boxMenu;
     private Label roomCodeDisplay, errorText, waitingMsg;
@@ -259,6 +262,41 @@ public class LobbyUIController : NetworkBehaviour
             // Tạo quả bóng và gọi nó ra mạng cho tất cả cùng thấy
             GameObject ball = Instantiate(ballPrefab, spawnPos, spawnRot);
             ball.GetComponent<NetworkObject>().Spawn();
+
+            Debug.Log("[SERVER] Tiếng còi khai cuộc! Đã ném bóng ra sân!");
+        }
+
+
+        GameObject[] oldEnemy = GameObject.FindGameObjectsWithTag("Enemy");
+        foreach (GameObject e in oldEnemy)
+        {
+            var netObj = e.GetComponent<NetworkObject>();
+
+            if (netObj != null && netObj.IsSpawned)
+            {
+                netObj.Despawn(true); // Lệnh này tự động Hủy mạng + Xóa (Destroy) vật thể luôn
+            }
+            else
+            {
+                Destroy(e); // Chỉ dùng Destroy thủ công nếu nó bị kẹt chưa được lên mạng
+            }
+        }
+
+        if (enemyPrefab != null)
+        {
+            Vector3 spawnPos = new Vector3(0, 5, 0); // Vị trí dự phòng
+            Quaternion spawnRot = Quaternion.identity;
+
+            // Nếu đã gán vị trí EnemySpawnPoint trên Inspector thì lấy vị trí đó
+            if (enemySpawnPoint != null)
+            {
+                spawnPos = enemySpawnPoint.position;
+                spawnRot = enemySpawnPoint.rotation;
+            }
+
+            // Tạo quả bóng và gọi nó ra mạng cho tất cả cùng thấy
+            GameObject enemy = Instantiate(enemyPrefab, spawnPos, spawnRot);
+            enemy.GetComponent<NetworkObject>().Spawn();
 
             Debug.Log("[SERVER] Tiếng còi khai cuộc! Đã ném bóng ra sân!");
         }

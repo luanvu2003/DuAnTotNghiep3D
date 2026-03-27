@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+using TMPro;
+using UnityEngine.UI;
 
 // BẮT BUỘC: Nhân vật cần có NetworkObject, NetworkTransform và NetworkAnimator
 [RequireComponent(typeof(CharacterController))]
@@ -37,6 +39,23 @@ public class PlayerController : NetworkBehaviour
     public float pushPower = 2.0f; // Độ mạnh khi đẩy vật
     public float kickCooldown = 0.5f; // Thời gian chờ giữa 2 lần đá
     private float lastKickTime = 0f;  // Lưu lại thời điểm đá cuối cùng
+    [Header("Hệ thống Máu")]
+    public NetworkVariable<int> currentHP = new NetworkVariable<int>(100, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    public int maxHP = 100;
+
+    [Header("UI Máu & Hồi máu")]
+    public Slider hpSlider;              // Kéo HPSlider vào đây
+    public GameObject healUIContainer;   // Kéo HealUIContainer vào đây
+    public Slider healProgressSlider;    // Kéo ProgressSlider vào đây
+    public TextMeshProUGUI healText;                // Kéo Text vào đây (Nếu dùng TextMeshPro thì đổi thành TMP_Text)
+
+    [Header("Cài đặt Cứu thương")]
+    public float healRange = 3f;         // Khoảng cách cứu (3 mét)
+    public float requiredHealTime = 3f;  // Thời gian giữ E (3 giây)
+    public int healAmount = 20;          // Lượng máu hồi
+    public float healCooldown = 5f;      // Hồi chiêu 5 giây
+    private float currentHealTime = 0f;
+    private float lastHealTime = -10f;
 
     private CharacterController characterController;
     private NetworkAnimator networkAnimator;
@@ -102,6 +121,29 @@ public class PlayerController : NetworkBehaviour
             // Bật cho cả người chơi khác để đồng bộ mượt hơn
             if (characterController != null) characterController.enabled = true;
         }
+        // Cài đặt thanh máu ban đầu
+        if (hpSlider != null)
+        {
+            hpSlider.maxValue = maxHP;
+            hpSlider.value = currentHP.Value;
+        }
+
+        // Đăng ký tự động nhảy máu khi bị đánh/hồi máu
+        currentHP.OnValueChanged += UpdateHPUI;
+
+        // Giấu cụm UI Hồi máu đi (Chỉ hiện khi đến gần người bị thương)
+        if (healUIContainer != null) healUIContainer.SetActive(false);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Hủy đăng ký khi chết/thoát game để tránh lỗi
+        currentHP.OnValueChanged -= UpdateHPUI;
+    }
+
+    private void UpdateHPUI(int previousValue, int newValue)
+    {
+        if (hpSlider != null) hpSlider.value = newValue;
     }
 
     public void Update()
@@ -129,6 +171,7 @@ public class PlayerController : NetworkBehaviour
             // Nếu lúc đầu chưa tìm thấy thì tìm lại
             if (Camera.main != null) mainCamera = Camera.main.transform;
         }
+        HandleHealingTeammate();
     }
     private void HandleMovement()
     {
@@ -263,5 +306,102 @@ public class PlayerController : NetworkBehaviour
                 rb.AddForce(force, ForceMode.Impulse);
             }
         }
+    }
+    private void HandleHealingTeammate()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, healRange);
+        PlayerController targetToHeal = null;
+
+        // Quét tìm đồng đội bị thương
+        foreach (var hit in hitColliders)
+        {
+            if (hit.CompareTag("Player") && hit.gameObject != this.gameObject)
+            {
+                PlayerController teammate = hit.GetComponent<PlayerController>();
+                // Chỉ nhắm vào đồng đội có máu < 100
+                if (teammate != null && teammate.currentHP.Value < teammate.maxHP)
+                {
+                    targetToHeal = teammate;
+                    break;
+                }
+            }
+        }
+
+        bool isCooldown = (Time.time - lastHealTime) < healCooldown;
+
+        if (targetToHeal != null)
+        {
+            // Có người bị thương ở gần -> Bật Cụm UI của bạn lên
+            if (healUIContainer != null) healUIContainer.SetActive(true);
+
+            if (isCooldown)
+            {
+                if (healText != null) healText.text = $"Hồi chiêu: {Mathf.CeilToInt(healCooldown - (Time.time - lastHealTime))}s";
+                if (healProgressSlider != null) healProgressSlider.gameObject.SetActive(false); // Giấu thanh 3s
+                currentHealTime = 0f;
+            }
+            else
+            {
+                if (healText != null) healText.text = "Giữ E để cứu";
+
+                if (Input.GetKey(KeyCode.E))
+                {
+                    // Đang đè E -> Hiện thanh 3s và cho chạy
+                    if (healProgressSlider != null) healProgressSlider.gameObject.SetActive(true);
+                    currentHealTime += Time.deltaTime;
+
+                    if (healProgressSlider != null)
+                    {
+                        healProgressSlider.maxValue = requiredHealTime;
+                        healProgressSlider.value = currentHealTime;
+                    }
+
+                    // Đủ 3 giây -> Hồi máu
+                    if (currentHealTime >= requiredHealTime)
+                    {
+                        HealTeammateServerRpc(targetToHeal.NetworkObjectId, healAmount);
+                        currentHealTime = 0f;
+                        lastHealTime = Time.time;
+                        if (healProgressSlider != null) healProgressSlider.gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    // Không đè E -> Giấu thanh 3s
+                    currentHealTime = 0f;
+                    if (healProgressSlider != null) healProgressSlider.gameObject.SetActive(false);
+                }
+            }
+        }
+        else
+        {
+            // Xung quanh không có ai bị thương -> Tắt sạch UI của bạn
+            currentHealTime = 0f;
+            if (healUIContainer != null) healUIContainer.SetActive(false);
+        }
+    }
+
+    [ServerRpc]
+    private void HealTeammateServerRpc(ulong targetPlayerId, int amount)
+    {
+        if (NetworkManager.Singleton.SpawnManager.SpawnedObjects.TryGetValue(targetPlayerId, out var targetObj))
+        {
+            var targetPlayer = targetObj.GetComponent<PlayerController>();
+            if (targetPlayer != null)
+            {
+                targetPlayer.currentHP.Value += amount;
+                if (targetPlayer.currentHP.Value > targetPlayer.maxHP)
+                    targetPlayer.currentHP.Value = targetPlayer.maxHP;
+            }
+        }
+    }
+
+    // Hàm này để Enemy gọi khi cắn trúng
+    public void TakeDamage(int damage)
+    {
+        if (!IsServer) return;
+
+        currentHP.Value -= damage;
+        if (currentHP.Value < 0) currentHP.Value = 0;
     }
 }
